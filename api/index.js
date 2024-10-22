@@ -15,7 +15,9 @@ const io = socketIo(server, {
 app.use(cors());
 
 let users = {};
-
+app.get('/', (req, res) => {
+  res.send('El backend está funcionando correctamente');
+});
 io.on('connection', (socket) => {
   console.log('Nuevo usuario conectado:', socket.id);
 
