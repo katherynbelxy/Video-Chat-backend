@@ -11,7 +11,7 @@ app.get('/', (req, res) => {
 // Configurar socket.io con cors y habilitar polling
 const io = socketIo(server, {
     cors: {
-        origin: 'https://video-chat-frontend-one.vercel.app',
+        origin: 'https://video-chat-frontend-one.vercel.app/',
         methods: ['GET', 'POST'],
         credentials: true,
     },
@@ -22,6 +22,7 @@ app.use(cors());
 
 io.on('connection', (socket) => {
     console.log('Nuevo usuario conectado');
+    console.log(socket.id);
     socket.on('signal', (data) => {
         socket.to(data.to).emit('signal', {
             signal: data.signal,
