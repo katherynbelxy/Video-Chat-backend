@@ -11,7 +11,7 @@ app.use(cors());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.send('final Servidor backend funcionando correctamente');
+    res.send('yes Servidor backend funcionando correctamente');
 });
 
 // Configurar socket.io con cors y habilitar polling
