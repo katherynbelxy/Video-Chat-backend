@@ -1,68 +1,65 @@
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
+const socketIo = require('socket.io');
 const cors = require('cors');
 
-// Configuración del servidor Express
 const app = express();
-app.use(cors());
-
 const server = http.createServer(app);
-
-// Configuración de Socket.IO
-const io = new Server(server, {
+const io = socketIo(server, {
   cors: {
-    origin: "*", // Permitir acceso desde cualquier origen
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
 
-// Manejador de conexiones de Socket.IO
+app.use(cors());
+
+let users = {};
+
 io.on('connection', (socket) => {
   console.log('Nuevo usuario conectado:', socket.id);
-  
-  // Enviar el ID del socket actual al cliente
+
+  // Enviar el ID del usuario conectado
   socket.emit('me', socket.id);
 
-  // Unir a los usuarios a una sala
+  // Unirse a la sala y asignar compañero
   socket.on('join', () => {
-    console.log('Usuario se unió:', socket.id);
-    const partnerId = findPartner(socket.id);
-    if (partnerId) {
-      // Informar a ambos usuarios que tienen un compañero
+    const userIds = Object.keys(users);
+    if (userIds.length === 1) {
+      const partnerId = userIds[0];
+      users[socket.id] = partnerId;
+      users[partnerId] = socket.id;
       socket.emit('partnerId', partnerId);
       io.to(partnerId).emit('partnerId', socket.id);
+    } else {
+      users[socket.id] = null; // Esperar a otro usuario
     }
   });
 
-  // Manejar el intercambio de señales
+  // Manejo de señales (WebRTC)
   socket.on('signal', (data) => {
-    console.log(`Señal recibida de ${socket.id} para ${data.to}`);
-    io.to(data.to).emit('signal', { signal: data.signal, from: socket.id });
+    const partnerId = users[socket.id];
+    if (partnerId) {
+      io.to(data.to).emit('signal', { signal: data.signal, from: socket.id });
+    }
   });
 
-  // Manejar el intercambio de mensajes
+  // Manejo de mensajes de chat de texto
   socket.on('message', (message) => {
-    console.log(`Mensaje recibido de ${socket.id}: ${message}`);
-    io.emit('message', message); // Envía el mensaje a todos los usuarios conectados
+    io.emit('message', message);
   });
 
-  // Manejar la desconexión
+  // Desconectar
   socket.on('disconnect', () => {
-    console.log('Usuario desconectado:', socket.id);
+    const partnerId = users[socket.id];
+    if (partnerId) {
+      io.to(partnerId).emit('partnerId', null);
+      users[partnerId] = null;
+    }
+    delete users[socket.id];
   });
 });
 
-// Encuentra un compañero disponible para el chat
-const findPartner = (currentSocketId) => {
-  const connectedSockets = Array.from(io.sockets.sockets.keys());
-  // Filtrar para encontrar otro usuario conectado
-  const partnerId = connectedSockets.find(id => id !== currentSocketId);
-  return partnerId || null; // Devuelve el ID del compañero o null si no hay nadie
-};
-
-// Iniciar el servidor
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+server.listen(5000, () => {
+  console.log('Servidor escuchando en el puerto 5000');
 });
