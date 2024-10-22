@@ -2,7 +2,6 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
-const { ExpressPeerServer } = require('peer');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,33 +11,24 @@ app.use(cors());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.send('Servidor backend funcionando correctamente');
+    res.send('initial Servidor backend funcionando correctamente');
 });
 
 // Configurar socket.io con cors
 const io = socketIo(server, {
     cors: {
-        origin: '*',
+        origin: '*', // Permitir todos los orígenes, ajusta esto según sea necesario
         methods: ['GET', 'POST'],
         credentials: true,
     },
 });
-
-// Configurar PeerJS
-const peerServer = ExpressPeerServer(server, {
-    debug: true,
-    path: '/myapp', // Ruta para PeerJS
-});
-
-// Usar PeerJS con el servidor
-app.use('/peerjs', peerServer);
 
 // Almacena los IDs de los usuarios conectados
 const users = {};
 
 io.on('connection', (socket) => {
     console.log('Nuevo usuario conectado:', socket.id);
-
+    
     // Generar un ID único para cada usuario
     users[socket.id] = socket.id;
 
