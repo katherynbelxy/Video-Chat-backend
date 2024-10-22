@@ -1,4 +1,3 @@
-
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -9,40 +8,30 @@ const server = http.createServer(app);
 app.get('/', (req, res) => {
     res.send('Servidor backend funcionando correctamente');
 });
-// Configura CORS para HTTP y WebSocket
-const corsOptions = {
-    origin: 'https://video-chat-frontend-one.vercel.app', // URL del frontend desplegado en Vercel
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // Permitir cookies/sesiones
-};
-
-// Usa CORS middleware para todas las rutas HTTP
-app.use(cors(corsOptions));
-
-// Configura Socket.io con CORS
+// Configuración de socket.io con CORS
 const io = socketIo(server, {
     cors: {
-        origin: 'https://video-chat-frontend-one.vercel.app', // URL del frontend desplegado
+        origin: 'https://video-chat-frontend-one.vercel.app', // URL de tu frontend
         methods: ["GET", "POST"],
-        credentials: true
+        allowedHeaders: ["Content-Type", "Authorization"],
+        credentials: true, // Permitir cookies/sesiones
+
     }
 });
 
-io.on('connection', (socket) => {
-    console.log('Nuevo usuario conectado');
-    console.log('Socket ID:', socket.id);
+// Middleware CORS
+app.use(cors());
 
-    // Escucha evento 'signal' enviado desde el frontend
+io.on('connection', (socket) => {
+    console.log('Nuevo usuario conectado:', socket.id);
+
     socket.on('signal', (data) => {
-        console.log(`Enviando señal a ${data.to}`);
         socket.to(data.to).emit('signal', {
             signal: data.signal,
             from: socket.id,
         });
     });
 
-    // Escucha evento de desconexión
     socket.on('disconnect', () => {
         console.log('Usuario desconectado');
     });
@@ -50,5 +39,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
