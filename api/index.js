@@ -5,7 +5,9 @@ const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-
+app.get('/', (req, res) => {
+    res.send('Servidor backend funcionando correctamente');
+});
 // Configurar socket.io con cors y habilitar polling
 const io = socketIo(server, {
     cors: {
