@@ -11,12 +11,13 @@ app.get('/', (req, res) => {
 // Configurar socket.io con cors y habilitar polling
 const io = socketIo(server, {
     cors: {
-        origin: 'https://video-chat-frontend-one.vercel.app', // URL del frontend
+        origin: 'https://video-chat-frontend-one.vercel.app', // Asegúrate de que esta URL sea correcta
         methods: ['GET', 'POST'],
         credentials: true,
     },
-    transports: ['polling'], // Habilitar el uso de polling
+    transports: ['polling'], // Puedes probar con 'websocket' también
 });
+
 
 app.use(cors());
 
