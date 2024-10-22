@@ -1,7 +1,8 @@
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const cors = require('cors');  // Importar cors
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
@@ -9,14 +10,14 @@ const io = socketIo(server);
 
 // Configurar CORS
 app.use(cors({
-    origin: 'https://video-chat-frontend-one.vercel.app',  // URL de tu frontend
+    origin: 'https://video-chat-frontend-one.vercel.app',
     methods: ['GET', 'POST'],
-    credentials: true // Si necesitas enviar cookies
+    credentials: true
 }));
-app.get('/', (req, res) => {
-  res.send('Servidor de Video Chat funcionando');
-});
 
+app.get('/', (req, res) => {
+    res.send('Servidor de Video Chat funcionando');
+  });
 let users = {};
 
 io.on('connection', (socket) => {
