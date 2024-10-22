@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: 'https://video-chat-frontend-git-main-videochats-projects-ccc910e3.vercel.app/', // URL del frontend
+        origin: 'https://video-chat-frontend-one.vercel.app/', // URL del frontend
         methods: ["GET", "POST"],
         credentials: true
     }
