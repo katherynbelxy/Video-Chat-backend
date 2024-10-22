@@ -11,7 +11,7 @@ app.use(cors());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.send('Nativo Servidor backend funcionando correctamente');
+    res.send('llServidor backend funcionando correctamente');
 });
 
 // Configurar socket.io con cors
