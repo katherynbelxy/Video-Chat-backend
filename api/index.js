@@ -16,7 +16,7 @@ app.use(cors({
 }));
 
 app.get('/', (req, res) => {
-    res.send('Servidor de Video Chat funcionando');
+    res.send('eServidor de Video Chat funcionando');
   });
 let users = {};
 
