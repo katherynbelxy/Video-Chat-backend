@@ -1,67 +1,55 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const cors = require('cors');
+const cors = require('cors');  // Importar cors
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+const io = socketIo(server);
 
-app.use(cors());
+// Configurar CORS
+app.use(cors({
+    origin: 'https://video-chat-frontend-one.vercel.app',  // URL de tu frontend
+    methods: ['GET', 'POST'],
+    credentials: true // Si necesitas enviar cookies
+}));
+app.get('/', (req, res) => {
+  res.send('Servidor de Video Chat funcionando');
+});
 
 let users = {};
-app.get('/', (req, res) => {
-  res.send('El backend está funcionando correctamente');
-});
+
 io.on('connection', (socket) => {
-  console.log('Nuevo usuario conectado:', socket.id);
+    console.log('Usuario conectado:', socket.id);
+    
+    // Almacena la ID del usuario
+    users[socket.id] = socket.id;
 
-  // Enviar el ID del usuario conectado
-  socket.emit('me', socket.id);
+    socket.emit('me', socket.id);
+    socket.broadcast.emit('partnerId', socket.id);
 
-  // Unirse a la sala y asignar compañero
-  socket.on('join', () => {
-    const userIds = Object.keys(users);
-    if (userIds.length === 1) {
-      const partnerId = userIds[0];
-      users[socket.id] = partnerId;
-      users[partnerId] = socket.id;
-      socket.emit('partnerId', partnerId);
-      io.to(partnerId).emit('partnerId', socket.id);
-    } else {
-      users[socket.id] = null; // Esperar a otro usuario
-    }
-  });
+    socket.on('join', () => {
+        console.log('Usuario se unió:', socket.id);
+    });
 
-  // Manejo de señales (WebRTC)
-  socket.on('signal', (data) => {
-    const partnerId = users[socket.id];
-    if (partnerId) {
-      io.to(data.to).emit('signal', { signal: data.signal, from: socket.id });
-    }
-  });
+    socket.on('signal', (data) => {
+        console.log('Señal enviada a:', data.to);
+        socket.to(data.to).emit('signal', { signal: data.signal, from: socket.id });
+    });
 
-  // Manejo de mensajes de chat de texto
-  socket.on('message', (message) => {
-    io.emit('message', message);
-  });
+    socket.on('message', (message) => {
+        console.log('Mensaje enviado:', message);
+        socket.broadcast.emit('message', message);
+    });
 
-  // Desconectar
-  socket.on('disconnect', () => {
-    const partnerId = users[socket.id];
-    if (partnerId) {
-      io.to(partnerId).emit('partnerId', null);
-      users[partnerId] = null;
-    }
-    delete users[socket.id];
-  });
+    socket.on('disconnect', () => {
+        console.log('Usuario desconectado:', socket.id);
+        delete users[socket.id];
+        socket.broadcast.emit('user-disconnected', socket.id);
+    });
 });
 
-server.listen(5000, () => {
-  console.log('Servidor escuchando en el puerto 5000');
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+    console.log(`Servidor en funcionamiento en el puerto ${PORT}`);
 });
