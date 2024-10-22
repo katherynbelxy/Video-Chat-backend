@@ -5,26 +5,21 @@ const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-app.get('/', (req, res) => {
-    res.send('Servidor backend funcionando correctamente');
-});
-// Configuración de socket.io con CORS
+
+// Configurar socket.io con cors y habilitar polling
 const io = socketIo(server, {
     cors: {
-        origin: 'https://video-chat-frontend-one.vercel.app', // URL de tu frontend
-        methods: ["GET", "POST"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-        credentials: true, // Permitir cookies/sesiones
-
-    }
+        origin: 'https://video-chat-frontend-one.vercel.app', // URL del frontend
+        methods: ['GET', 'POST'],
+        credentials: true,
+    },
+    transports: ['polling'], // Habilitar el uso de polling
 });
 
-// Middleware CORS
 app.use(cors());
 
 io.on('connection', (socket) => {
-    console.log('Nuevo usuario conectado:', socket.id);
-
+    console.log('Nuevo usuario conectado');
     socket.on('signal', (data) => {
         socket.to(data.to).emit('signal', {
             signal: data.signal,
@@ -39,5 +34,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
