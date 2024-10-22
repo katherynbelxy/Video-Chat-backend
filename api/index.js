@@ -11,7 +11,7 @@ app.use(cors());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.send('1Servidor backend funcionando correctamente');
+    res.send('Servidor backend funcionando correctamente');
 });
 
 // Configurar socket.io con cors y habilitar polling
@@ -56,8 +56,7 @@ io.on('connection', (socket) => {
     // Manejar mensajes
     socket.on('message', (message) => {
         console.log('Mensaje recibido:', message);
-        // Reenviar el mensaje a todos los usuarios, incluyendo al que lo envió
-        io.emit('message', message);
+        io.emit('message', message); // Reenviar el mensaje a todos los usuarios
     });
 
     // Limpiar la lista de usuarios desconectados
