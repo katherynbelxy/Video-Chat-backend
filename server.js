@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: 'https://glrtzw7g-3000.use2.devtunnels.ms', // URL del frontend
+        origin: 'https://video-chat-frontend-git-main-videochats-projects-ccc910e3.vercel.app/', // URL del frontend
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -18,7 +18,7 @@ app.use(cors());
 
 io.on('connection', (socket) => {
     console.log('Nuevo usuario conectado');
-
+    console.log(socket.id);
     socket.on('signal', (data) => {
         socket.to(data.to).emit('signal', {
             signal: data.signal,
