@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
-const { ExpressPeerServer } = require('peer'); // Importar el servidor PeerJS
+const { ExpressPeerServer } = require('peer');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,17 +12,26 @@ app.use(cors());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.send('final Servidor backend funcionando correctamente');
+    res.send('Servidor backend funcionando correctamente');
 });
 
 // Configurar socket.io con cors
 const io = socketIo(server, {
     cors: {
-        origin: '*', // Permitir todos los orígenes, ajusta esto según sea necesario
+        origin: '*',
         methods: ['GET', 'POST'],
         credentials: true,
     },
 });
+
+// Configurar PeerJS
+const peerServer = ExpressPeerServer(server, {
+    debug: true,
+    path: '/myapp', // Ruta para PeerJS
+});
+
+// Usar PeerJS con el servidor
+app.use('/peerjs', peerServer);
 
 // Almacena los IDs de los usuarios conectados
 const users = {};
@@ -64,15 +73,6 @@ io.on('connection', (socket) => {
         delete users[socket.id];
     });
 });
-
-// Configurar PeerJS
-const peerServer = ExpressPeerServer(server, {
-    debug: true, // Para ver más detalles en la consola
-    path: '/myapp', // Puedes cambiar el path según lo necesites
-});
-
-// Montar el servidor PeerJS en el servidor Express
-app.use('/peerjs', peerServer);
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
