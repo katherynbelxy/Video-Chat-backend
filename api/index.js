@@ -1,6 +1,4 @@
-app.get('/', (req, res) => {
-    res.send('Servidor backend funcionando correctamente');
-});
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -8,7 +6,9 @@ const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-
+app.get('/', (req, res) => {
+    res.send('Servidor backend funcionando correctamente');
+});
 // Configura CORS para HTTP y WebSocket
 const corsOptions = {
     origin: 'https://video-chat-frontend-one.vercel.app', // URL del frontend desplegado en Vercel
