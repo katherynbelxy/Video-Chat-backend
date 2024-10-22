@@ -11,17 +11,17 @@ app.use(cors());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.send('3Servidor backend funcionando correctamente');
+    res.send('1Servidor backend funcionando correctamente');
 });
 
 // Configurar socket.io con cors y habilitar polling
 const io = socketIo(server, {
     cors: {
-        origin: 'https://video-chat-frontend-one.vercel.app/', // Cambia esto según tu frontend
+        origin: 'https://video-chat-frontend-one.vercel.app/', // Cambia esto por la URL de tu frontend
         methods: ['GET', 'POST'],
         credentials: true,
     },
-    transports: ['websocket', 'polling'], // Asegúrate de incluir 'websocket' aquí
+    transports: ['websocket', 'polling'],
 });
 
 // Almacena los IDs de los usuarios conectados
@@ -53,10 +53,11 @@ io.on('connection', (socket) => {
         });
     });
 
-    // Manejar el envío de mensajes
+    // Manejar mensajes
     socket.on('message', (message) => {
         console.log('Mensaje recibido:', message);
-        socket.to(users[message.sender]).emit('message', message); // Enviar el mensaje al otro usuario
+        // Reenviar el mensaje a todos los usuarios, incluyendo al que lo envió
+        io.emit('message', message);
     });
 
     // Limpiar la lista de usuarios desconectados
