@@ -4,27 +4,38 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 
 const app = express();
+app.get('/', (req, res) => {
+    res.send('Servidor backend funcionando correctamente');
+    res.send('Nativo Servidor backend funcionando correctamente');
+});
 const server = http.createServer(app);
 const io = socketIo(server, {
-  cors: {
-    origin: 'https://video-chat-frontend-one.vercel.app/', // Cambia por tu frontend URL
-    methods: ['GET', 'POST'],
-    credentials: true,
-  }
+    cors: {
+        origin: 'https://video-chat-frontend-one.vercel.app/', // Cambia esto por la URL de tu frontend
+        origin: '*', // Permitir todos los orígenes, ajusta esto según sea necesario
+        methods: ['GET', 'POST'],
+        credentials: true,
+    },
+    transports: ['websocket', 'polling'],
 });
 
-app.use(cors());
+// Middleware CORS
+app.use(cors({
+  origin: 'https://video-chat-frontend-one.vercel.app/', // La URL de tu frontend
+  methods: ['GET', 'POST'], // Métodos permitidos
+  allowedHeaders: ['Content-Type'], // Encabezados permitidos
+  credentials: true, // Permitir el uso de credenciales (cookies, tokens, etc.)
+}));
 
 const users = {};
 
 io.on('connection', (socket) => {
   console.log('Nuevo usuario conectado:', socket.id);
 
-  // Cuando un usuario se une, guarda su ID
   socket.on('join', (peerId) => {
     users[socket.id] = peerId;
 
-    // Compartir el ID del compañero con el usuario
+    // Encontrar un compañero disponible y enviar el ID del compañero al cliente
     const partnerId = Object.values(users).find(id => id !== peerId);
     if (partnerId) {
       socket.emit('partnerId', partnerId);
@@ -32,7 +43,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Limpiar al desconectarse
   socket.on('disconnect', () => {
     console.log('Usuario desconectado:', socket.id);
     delete users[socket.id];
